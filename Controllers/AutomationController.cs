@@ -28,6 +28,8 @@ namespace ServicesAutomation.Controllers
             JObject productObj = new JObject();
             productObj["Id"] = 4402979;
             productObj["Name"] = "1º Periodo";
+            product["Product"] = productObj;
+            
             blockProducts.Add(product);
             //blockProducts.Add(serviceField);
 
