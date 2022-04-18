@@ -7,6 +7,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers().AddNewtonsoftJson();
+builder.Services.AddCors(c => c.AddPolicy("AllowAll", builder =>
+ {
+     builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+ }));
 
 var app = builder.Build();
 
@@ -21,7 +25,7 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
-
+app.UseCors("AllowAll");
 
 app.MapControllers();
 
