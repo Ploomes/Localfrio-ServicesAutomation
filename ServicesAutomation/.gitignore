@@ -1,0 +1,6 @@
+
+# docker secrets
+.ploomesdev/ServicesAutomation/secrets
+
+# ploomesdev temporary files
+.ploomesdev/ServicesAutomation/generated

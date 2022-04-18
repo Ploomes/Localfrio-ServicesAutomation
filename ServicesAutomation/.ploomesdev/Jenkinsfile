@@ -1,0 +1,74 @@
+pipeline {
+    agent { label 'linux' }
+    environment {
+        DOCKER_HOME = tool 'docker'
+        PLOOMESDEV_HOME = "/ploomesdev"
+        PATH = "$DOCKER_HOME/bin:$PLOOMESDEV_HOME/bin:$PATH"
+        ACR_SERVER = "https://ploomes.azurecr.io"
+        PROJECT_NAME = "ServicesAutomation"
+        ROOT_PATH = pwd()
+        TESTS_PATH = "${ROOT_PATH}/.ploomesdev/${PROJECT_NAME}/tests/"
+        COLLECTION = "${TESTS_PATH}collection/${PROJECT_NAME}.postman_collection"
+    }
+    stages {
+        stage('Build') {
+            steps {
+                checkout scm
+                sh 'ploomesdev --test-image --branch $GIT_BRANCH --project $PROJECT_NAME --no-colors build'
+                sh 'ploomesdev --test-image --debug-image --branch $GIT_BRANCH --project $PROJECT_NAME --no-colors build'
+            }
+        }
+        stage('Publish Test Images') {
+            steps {
+                withCredentials([azureServicePrincipal(
+                    credentialsId: "azure-sp",
+                    clientIdVariable: 'AZURE_CLIENT_ID',
+                    clientSecretVariable: 'AZURE_CLIENT_SECRET',
+                    tenantIdVariable: 'AZURE_TENANT_ID'
+                )]) {
+                    sh 'docker login -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET $ACR_SERVER'
+                    sh "ploomesdev --test-image --branch $GIT_BRANCH --project $PROJECT_NAME --no-colors publish -y"
+                    sh "ploomesdev --test-image --debug-image --branch $GIT_BRANCH --project $PROJECT_NAME --no-colors publish -y"
+                }
+            }
+        }
+        // stage('Custom Tests') {
+        //     steps {
+        //             sh "ploomesdev --test-image --branch $GIT_BRANCH --project $PROJECT_NAME --no-colors test"
+        //             sh "ploomesdev --test-image --debug-image --branch $GIT_BRANCH --project $PROJECT_NAME --no-colors test"
+        //     }
+        // }
+        stage('Newman Tests') {
+            steps {
+                sh "ploomesdev --branch $GIT_BRANCH --project $PROJECT_NAME --no-colors dir2json $COLLECTION"
+                script {
+                    if (fileExists("${COLLECTION}.json"))
+                    {
+                        sh "ploomesdev --test-image --branch $GIT_BRANCH --project $PROJECT_NAME --no-colors test"
+                        sh "ploomesdev --test-image --debug-image --branch $GIT_BRANCH --project $PROJECT_NAME --no-colors test"
+                    }
+                }
+            }
+        }
+        stage('Publish Approved Images') {
+            steps {
+                withCredentials([azureServicePrincipal(
+                    credentialsId: "azure-sp",
+                    clientIdVariable: 'AZURE_CLIENT_ID',
+                    clientSecretVariable: 'AZURE_CLIENT_SECRET',
+                    tenantIdVariable: 'AZURE_TENANT_ID'
+                )]) {
+                        script {
+                            def docker_image = "${PROJECT_NAME.toLowerCase()}:${GIT_BRANCH.toLowerCase()}"
+                            for (mode in ["development", "debug"]) {
+                                sh "docker tag \$(echo ${docker_image} | sed 's/_/--/g' -)-${mode}-test \$(echo ${docker_image} | sed 's/_/--/g' -)-${mode}"
+                            }
+                        }
+                    sh 'docker login -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET $ACR_SERVER'
+                    sh "ploomesdev --branch $GIT_BRANCH --project $PROJECT_NAME --no-colors publish -y"
+                    sh "ploomesdev --debug-image --branch $GIT_BRANCH --project $PROJECT_NAME --no-colors publish -y"
+                }
+            }
+        }
+    }
+}

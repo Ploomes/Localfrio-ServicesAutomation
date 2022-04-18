@@ -1,0 +1,12 @@
+{
+    "Type": "custom",
+    "DockerImage": "mcr.microsoft.com/dotnet/sdk:5.0",
+    "Volumes": [
+        "<@ ROOT_PATH @>:/src"
+    ],
+    "Commands": [
+        "dotnet",
+        "test",
+        "/src"
+    ]
+}

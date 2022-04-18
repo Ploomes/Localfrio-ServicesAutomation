@@ -1,0 +1,74 @@
+<@ DEBUG_ONLY_BEGIN @>
+apiVersion: v1
+kind: Service
+metadata:
+  name: <@ INSTANCE_NAME @>-ssh
+  labels:
+    app: <@ INSTANCE_NAME @>
+spec:
+  ports:
+  - name: ssh
+    port: 22
+  <@ SERVICE_PORTS @>
+  selector:
+    app: <@ INSTANCE_NAME @>
+---
+<@ DEBUG_ONLY_END @>
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: <@ INSTANCE_NAME @>
+  labels:
+    app: <@ INSTANCE_NAME @>
+spec:
+  ports:
+  <@ SERVICE_PORTS @>
+  selector:
+    app: <@ INSTANCE_NAME @>
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: <@ INSTANCE_NAME @>
+  labels:
+    app: <@ INSTANCE_NAME @>
+spec:
+  replicas: <@ REPLICAS @>
+  selector:
+    matchLabels:
+      app: <@ INSTANCE_NAME @>
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: <@ INSTANCE_NAME @>
+    spec:
+      nodeSelector:
+        kubernetes.io/os: linux
+        type: Standard
+      containers:
+      - name: <@ INSTANCE_NAME @>
+        imagePullPolicy: Always
+        image: ploomes.azurecr.io/ploomes/servicesautomation:<@ IMAGE_TAG @>
+        ports:
+        <@ CONTAINER_PORTS @>
+        <@ DEBUG_ONLY_BEGIN @>
+        - containerPort: 22
+        <@ DEBUG_ONLY_END @>
+        env:
+        <@ DATADOG_TRACER_ENVIRONMENT_VARIABLES @>
+        <@ ENVIRONMENT_VARIABLES_FROM_SECRET @>
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        volumeMounts:
+        - name: secrets
+          mountPath: "/secrets"
+          readOnly: true
+      volumes:
+        - name: secrets
+          secret:
+            secretName: <@ SECRET_NAME @>

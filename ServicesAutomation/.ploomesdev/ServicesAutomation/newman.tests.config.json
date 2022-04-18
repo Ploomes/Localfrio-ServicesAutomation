@@ -1,0 +1,16 @@
+{
+    "Type": "newman",
+    "DockerImage": "postman/newman:5.2",
+    "BundleUrlModifier": "test",
+    "Volumes": [
+        "<@ TESTS_PATH @>/collection:/etc/newman"
+    ],
+    "Commands": [
+        "run",
+        "ServicesAutomation.postman_collection.json",
+        "--environment",
+        "ServicesAutomation.postman_environment.json",
+        "--color",
+        "off"
+    ]
+}
