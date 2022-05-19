@@ -72,10 +72,11 @@ namespace ServicesAutomation.Controllers
 
             JObject block = new JObject();
 
-            string urlRequest = "";
+            int serviceId = (int)body["ServiceId"];
+
+            string urlRequest = $"Products?$filter=FamilyId+eq+{serviceId}";
 
             JArray getProducts = RequestHandler.MakeRequest(urlRequest, Method.GET);
-
 
             //Produtos do bloco
             JArray blockProducts = new JArray();
