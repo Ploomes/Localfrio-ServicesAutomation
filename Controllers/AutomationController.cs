@@ -14,10 +14,10 @@ namespace ServicesAutomation.Controllers
             JObject sections = new JObject();
 
             JArray arraySections = new JArray();
-            
+
             JObject blockZero = new JObject();
             //blockZero["Code"] = 0;
-            
+
             //Produtos do bloco
             JArray blockProducts = new JArray();
             JObject product = new JObject();
@@ -29,14 +29,14 @@ namespace ServicesAutomation.Controllers
             productObj["Id"] = 4402979;
             productObj["Name"] = "1º Periodo";
             product["Product"] = productObj;
-            
+
             blockProducts.Add(product);
             //blockProducts.Add(serviceField);
 
             blockZero.Add("Products", blockProducts);
             return blockZero;
         }
-        
+
         [HttpGet]
         [Route("Service")]
         public JObject Service()
@@ -44,10 +44,10 @@ namespace ServicesAutomation.Controllers
             JObject sections = new JObject();
 
             JArray arraySections = new JArray();
-            
+
             JObject blockZero = new JObject();
             //blockZero["Code"] = 0;
-            
+
             //Campo de opções de serviço
             JArray serviceField = new JArray();
             JObject service = new JObject();
@@ -60,6 +60,43 @@ namespace ServicesAutomation.Controllers
             arraySections.Add(blockZero);
             sections["Sections"] = arraySections;
             return sections;
+        }
+
+        [HttpPost]
+        [Route("ServiceProducts")]
+        public JObject GetServiceProducts(JObject body)
+        {
+            JObject sections = new JObject();
+
+            JArray arraySections = new JArray();
+
+            JObject block = new JObject();
+
+            string urlRequest = "";
+
+            JArray getProducts = RequestHandler.MakeRequest(urlRequest, Method.GET);
+
+
+            //Produtos do bloco
+            JArray blockProducts = new JArray();
+
+            foreach (JObject productInArray in getProducts)
+            {
+                JObject product = new JObject();
+                product["ProductId"] = productInArray["Id"];
+                product["Quantity"] = 1;
+                product["UnitPrice"] = productInArray["UnitPrice"];
+
+                JObject productObj = new JObject();
+                productObj["Id"] = productInArray["Id"];
+                productObj["Name"] = productInArray["Name"];
+                product["Product"] = productObj;
+
+                blockProducts.Add(product);
+            }
+
+            block.Add("Products", blockProducts);
+            return block;
         }
     }
 }
