@@ -52,5 +52,50 @@ namespace ServicesAutomation.Controllers
             block.Add("Products", blockProducts);
             return block;
         }
+        [HttpPost]
+        [Route("ServiceProductsTest")]
+        public JObject GetServiceProductsTest(JObject body)
+        {
+            PlooLib.InstantiateConnection();
+            JObject sections = new JObject();
+
+            JArray arraySections = new JArray();
+
+            JObject block = new JObject();
+
+            int serviceId = (int)body["ServiceId"];
+
+            string urlRequest = $"Products?$filter=(Id+eq+{serviceId})&$expand=OtherProperties($filter=FieldId+eq+10119528)";
+            //product_06495A67-033C-4DFB-9290-AAEC721D7C09
+
+            JArray getProducts = RequestHandler.MakeRequest(urlRequest, Method.GET);
+
+            //Produtos do bloco
+            JArray blockProducts = new JArray();
+
+            JArray otherProperties = JArray.Parse(getProducts[0]["OtherProperties"].ToString());
+
+            foreach (JObject productInArray in otherProperties)
+            {
+                int productId = (int)productInArray["ProductValueId"];
+                urlRequest = $"Products?$filter=(((Id+eq+{productId})))";
+                JObject productGet = RequestHandler.MakeRequest(urlRequest, Method.GET)[0] as JObject;
+
+                JObject product = new JObject();
+                product = productGet;
+                /*product["Quantity"] = 1;
+                product["UnitPrice"] = productGet["UnitPrice"];*/
+
+                JObject productObj = new JObject();
+                productObj = product;
+                /*productObj["Name"] = productGet["Name"];
+                product["Product"] = productObj;*/
+
+                blockProducts.Add(product);
+            }
+
+            block.Add("Products", blockProducts);
+            return block;
+        }
     }
 }
