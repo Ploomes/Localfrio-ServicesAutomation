@@ -39,7 +39,7 @@ namespace ServicesAutomation.Controllers
                 JArray prodOtherProp = JArray.Parse(productGet["OtherProperties"].ToString());
                 string strValue = ConcatenaValores(prodOtherProp);
                 JArray otherProp = new JArray();
-                otherProp.Add(PlooLib.handleOtherProperties("quote_product_2D4A9A22-3E15-4280-8CE1-08DC63306D32", "StringValue", strValue));
+                otherProp.Add(PlooLib.handleOtherProperties("quote_product_2D4A9A22-3E15-4280-8CE1-08DC63306D32", "BigStringValue", strValue));
 
                 JObject product = new JObject();
                 product["ProductId"] = productGet["Id"];
