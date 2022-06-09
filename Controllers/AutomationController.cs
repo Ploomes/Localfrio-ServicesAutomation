@@ -33,17 +33,25 @@ namespace ServicesAutomation.Controllers
             foreach (JObject productInArray in otherProperties)
             {
                 int productId = (int)productInArray["ProductValueId"];
-                urlRequest = $"Products?$filter=(((Id+eq+{productId})))";
+                urlRequest = $"Products?$filter=(Id+eq+{productId})&$expand=OtherProperties";
                 JObject productGet = RequestHandler.MakeRequest(urlRequest, Method.GET)[0] as JObject;
+
+                JArray prodOtherProp = JArray.Parse(productGet["OtherProperties"].ToString());
+                string strValue = ConcatenaValores(prodOtherProp);
+                JArray otherProp = new JArray();
+                otherProp.Add(PlooLib.handleOtherProperties("quote_product_2D4A9A22-3E15-4280-8CE1-08DC63306D32", "StringValue", strValue));
 
                 JObject product = new JObject();
                 product["ProductId"] = productGet["Id"];
                 product["Quantity"] = 1;
                 product["UnitPrice"] = productGet["UnitPrice"];
+                product["OtherProperties"] = otherProp;
+
 
                 JObject productObj = new JObject();
                 productObj["Id"] = productGet["Id"];
                 productObj["Name"] = productGet["Name"];
+                productObj["OtherProperties"] = otherProp;
                 product["Product"] = productObj;
 
                 blockProducts.Add(product);
@@ -51,6 +59,26 @@ namespace ServicesAutomation.Controllers
 
             block.Add("Products", blockProducts);
             return block;
+        }
+
+        private string ConcatenaValores(JArray otherProperties)
+        {
+            //FieldKey:DecimalValue--
+            string concatenado = "";
+            foreach (JObject item in otherProperties)
+            {
+                string fieldKey = "";
+                float decimalValue = 0;
+
+                if (!PlooLib.IsNullOrEmpty(item["DecimalValue"]))
+                {
+                    fieldKey = item["FieldKey"].ToString();
+                    decimalValue = (float)item["DecimalValue"];
+                    concatenado += $"{fieldKey}:{decimalValue}--";
+                }
+
+            }
+            return concatenado;
         }
         [HttpPost]
         [Route("ServiceProductsTest")]
