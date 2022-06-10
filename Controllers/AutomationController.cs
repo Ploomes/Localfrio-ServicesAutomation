@@ -68,14 +68,31 @@ namespace ServicesAutomation.Controllers
             foreach (JObject item in otherProperties)
             {
                 string fieldKey = "";
-                float decimalValue = 0;
+                string fieldValue = "";
 
                 if (!PlooLib.IsNullOrEmpty(item["DecimalValue"]))
                 {
                     fieldKey = item["FieldKey"].ToString();
-                    decimalValue = (float)item["DecimalValue"];
-                    concatenado += $"{fieldKey}:{decimalValue}--";
+                    fieldValue = item["DecimalValue"].ToString();
                 }
+                if (!PlooLib.IsNullOrEmpty(item["StringlValue"]))
+                {
+                    fieldKey = item["FieldKey"].ToString();
+                    fieldValue = item["StringlValue"].ToString();
+                }
+                if (!PlooLib.IsNullOrEmpty(item["BigStringlValue"]))
+                {
+                    fieldKey = item["FieldKey"].ToString();
+                    fieldValue = item["BigStringlValue"].ToString();
+                }
+                if (!PlooLib.IsNullOrEmpty(item["IntegerValue"]))
+                {
+                    fieldKey = item["FieldKey"].ToString();
+                    fieldValue = item["IntegerValue"].ToString();
+                }
+
+                if (fieldValue != "")
+                    concatenado += $"{fieldKey}:{fieldValue}--";
 
             }
             return concatenado;
