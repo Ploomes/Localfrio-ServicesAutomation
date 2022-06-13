@@ -75,15 +75,15 @@ namespace ServicesAutomation.Controllers
                     fieldKey = item["FieldKey"].ToString();
                     fieldValue = item["DecimalValue"].ToString();
                 }
-                if (!PlooLib.IsNullOrEmpty(item["StringlValue"]))
+                if (!PlooLib.IsNullOrEmpty(item["StringValue"]))
                 {
                     fieldKey = item["FieldKey"].ToString();
-                    fieldValue = item["StringlValue"].ToString();
+                    fieldValue = item["StringValue"].ToString();
                 }
-                if (!PlooLib.IsNullOrEmpty(item["BigStringlValue"]))
+                if (!PlooLib.IsNullOrEmpty(item["BigStringValue"]))
                 {
                     fieldKey = item["FieldKey"].ToString();
-                    fieldValue = item["BigStringlValue"].ToString();
+                    fieldValue = item["BigStringValue"].ToString();
                 }
                 if (!PlooLib.IsNullOrEmpty(item["IntegerValue"]))
                 {
